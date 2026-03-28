@@ -9,14 +9,13 @@ const NavBar = () => {
     const [isActive,setIsActive]=useState(pathname || "/");
 
     const navItems=[
+        {name:"vendor",href:"/vendor"},
         {name:"contracts",href:"/contracts"},
-        {name:"extract",href:"/extract"},
-        {name:"compare",href:"/compare"},
-        {name:"renewals",href:"/renewals"},
+        {name:"upload",href:"/upload"},
     ]
 
   return (
-    <div className='border-b border-neutral-800 bg-neutral-900 opacity-90 sticky top-0 z-50'>
+    <div className='border-b border-blue-500 bg-neutral-900 opacity-70 top-0 z-50'>
         <div className='max-w-7xl mx-auto flex items-center justify-between p-4'>
             <motion.div whileHover={{scale:1.1}} className='rounded-xl border border-neutral-800 bg-neutral-900 p-4 md:text-5xl lg:text-6xl p4 shadow-lg'>
                 <h1 className=' text-lg text-white hover:text-white'><Link href="/">City of Richmond Procurement</Link></h1>

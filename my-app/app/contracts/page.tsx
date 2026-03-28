@@ -1,9 +1,11 @@
-import React from 'react'
+import react from 'react';
+import ContractsPage from '../../components/contracts/ContractPage';
 
-const ContractsPage = () => {
+
+export default function contracts(){
   return (
-    <div>page</div>
+    <div>
+      <ContractsPage />
+    </div>
   )
 }
-
-export default ContractsPage;
