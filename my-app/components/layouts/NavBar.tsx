@@ -9,9 +9,8 @@ const NavBar = () => {
     const [isActive,setIsActive]=useState(pathname || "/");
 
     const navItems=[
+        {name:"vendor",href:"/vendor"},
         {name:"contracts",href:"/contracts"},
-        {name:"compare",href:"/compare"},
-        {name:"renewals",href:"/renewals"},
         {name:"upload",href:"/upload"},
     ]
 

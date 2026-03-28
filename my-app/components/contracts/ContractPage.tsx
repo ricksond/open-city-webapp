@@ -1,11 +1,8 @@
 "use client";
-import react from 'react';
 import {motion} from 'framer-motion';
 import {
     FileText,
     Calendar,
-    DollarSign,
-    Users,
     CheckSquare
 } from 'lucide-react';
 
@@ -74,6 +71,7 @@ export default function ContractPage(){
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                 {response.contracts.map((c)=>(
                     <motion.div
+                    key={c.contract_id}
                     initial={{opacity:0,y:20}}
                     animate={{opacity:1,y:0}}
                     transition={{duration:0.5,delay:0.3}}
@@ -97,5 +95,5 @@ export default function ContractPage(){
             </div>
         </motion.div>
     </motion.div>
-    )
+    );
 }

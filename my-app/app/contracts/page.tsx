@@ -1,4 +1,3 @@
-import { div } from 'framer-motion/client';
 import react from 'react';
 import ContractsPage from '../../components/contracts/ContractPage';
 
