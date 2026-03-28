@@ -78,12 +78,12 @@ def load_and_index_data():
         v_id = vendor.get("vendor_id", "N/A")
         processed_contracts = []
         for contract in vendor.get("contracts", []):
-            end_date = contract.get("end_date", "N/A")
+            end_date = contract.get("effective_to", "N/A")
             contract_data = {
                 "vendor_name": v_name,
                 "contract_id": contract.get("contract_id") or contract.get("contract_number", "N/A"),
                 "description": contract.get("description", "No description"),
-                "start_date": contract.get("start_date", "N/A"),
+                "start_date": contract.get("effective_from", "N/A"),
                 "end_date": end_date,
                 "amount": contract.get("amount", 0.0),
                 "is_expiring_soon": check_expiry_soon(end_date)
