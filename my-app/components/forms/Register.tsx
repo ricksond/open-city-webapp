@@ -62,8 +62,9 @@ export default function Register() {
       });
       sessionStorage.setItem("token", res.data.idToken);
       sessionStorage.setItem("uid", res.data.uid);
-
+      sessionStorage.setItem("organization_name", res.data.organization_name);
       console.log("Register success:", res.data);
+      window.location.href = "/";
     } catch (err: any) {
       const msg = err.response?.data?.error?.message || "Register failed";
       setError(msg);

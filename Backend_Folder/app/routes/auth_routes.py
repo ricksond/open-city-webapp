@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app as app
+from flask import Blueprint, request, jsonify, session, current_app as app
 import json
 from firebase_admin import firestore
 
@@ -36,13 +36,14 @@ def register():
     email = data.get("email")
     password = data.get("password")
     organization_name = data.get("organization_name")
-    print(email, password, organization_name)
-    if not email or not password :
+    
+    if not email or not password:
         return jsonify({
             "error": {
                 "message": "EMAIL_PASSWORD_ORG_REQUIRED"
             }
         }), 400
+
     user = app.pb_auth.create_user_with_email_and_password(email, password)
     uid = user['localId']
     id_token = user['idToken']
@@ -51,10 +52,12 @@ def register():
         "organization_name": organization_name,
         "created_at": firestore.SERVER_TIMESTAMP
     })
+    session['organization_name'] = organization_name
     return jsonify({
         "message": "User registered",
         "uid": uid,
-        "idToken": id_token
+        "idToken": id_token,
+        "organization_name": organization_name
     }), 201
 
 
@@ -66,12 +69,20 @@ def login():
     if not email or not password:
         return jsonify({"error": {"message": "EMAIL_AND_PASSWORD_REQUIRED"}}), 400
     user = app.pb_auth.sign_in_with_email_and_password(email, password)
+    uid = user['localId']
+    user_doc = app.db.collection("users").document(uid).get()
+    organization_name = None
+    if user_doc.exists:
+        organization_name = user_doc.to_dict().get("organization_name")
+        session['organization_name'] = organization_name
     return jsonify({
         "message": "Login success",
         "idToken": user['idToken'],
-        "uid": user['localId']
+        "uid": uid,
+        "organization_name": organization_name
     }), 200
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
+    session.pop('organization_name', None)
     return jsonify({"message": "Logged out"}), 200
