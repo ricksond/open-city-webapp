@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
+from flask import jsonify, request
 info_bp = Blueprint("info", __name__, url_prefix="/info")
 load_dotenv()
 def get_llm():
@@ -181,24 +182,95 @@ def get_vendor_details(vendor_name):
         "entities_served": vendor["entities_served"],
         "ai_summary": summary
     })
+@info_bp.route("/dashboard/<name>", methods=["GET"])
+def getDashInfo(name):
+    normalized_name = name.lower().strip()
+    vendor_match = next((v for v in vendors_dict if v.lower() == normalized_name), None)
+    
+    if vendor_match:
+        vendor = vendors_dict[vendor_match]
 
+        expiring_contracts = [c for c in vendor.get("contracts", []) if c.get("is_expiring_soon")]
+        
+        return jsonify({
+            "type": "vendor",
+            "name": vendor_match,
+            "total_earnings": round(vendor.get("total_spend", 0), 2),
+            "expiring_contracts_count": len(expiring_contracts),
+            "entities_worked_with_count": len(vendor.get("entities_served", {}))
+        }), 200
+    entity_match = next((e for e in entities_dict if e.lower() == normalized_name), None)
+    
+    if entity_match:
+        entity = entities_dict[entity_match]
+        vendors_used = entity.get("vendors_used", {})
+        sorted_vendors = sorted(
+            vendors_used.items(), 
+            key=lambda item: item[1].get("total_spend_with_vendor", 0), 
+            reverse=True
+        )[:3]
+        
+        top_3_details = []
+        for v_name, v_data in sorted_vendors:
+            vendor_profile = vendors_dict.get(v_name, {})
+            expiring = [c for c in vendor_profile.get("contracts", []) if c.get("is_expiring_soon")]
+            
+            top_3_details.append({
+                "vendor_name": v_name,
+                "spend_with_entity": round(v_data.get("total_spend_with_vendor", 0), 2),
+                "expiring_contracts": expiring
+            })
+            
+        return jsonify({
+            "type": "entity",
+            "name": entity_match,
+            "total_vendors_count": len(vendors_used),
+            "top_3_vendors": top_3_details
+        }), 200
+    return jsonify({"error": "Record not found. Please check the vendor or entity name."}), 404
+    
 @info_bp.route("/entities/<entity_name>", methods=["GET"])
 def get_entity_details(entity_name):
     entity = entities_dict.get(entity_name)
     if not entity:
         normalized_name = entity_name.lower().strip()
         match = next((e for e in entities_dict if e.lower() == normalized_name), None)
-        if match: entity = entities_dict[match]; entity_name = match
-        else: return jsonify({"error": "Entity not found"}), 404
-
-    summary = generate_summary({"entity": entity_name, "total_spend": entity["total_spend"]}, f"Entity: {entity_name}")
+        if match: 
+            entity = entities_dict[match]
+            entity_name = match
+        else: 
+            return jsonify({"error": "Entity not found"}), 404
+    try:
+        summary = generate_summary(
+            {"entity": entity_name, "total_spend": entity.get("total_spend", 0)}, 
+            f"Entity: {entity_name}"
+        )
+    except Exception as e:
+        print(f"AI Summary Error: {e}")
+        summary = "Summary temporarily unavailable."
+    all_vendors = entity.get("vendors_used", {})
+    sorted_vendors = sorted(
+        all_vendors.items(),
+        key=lambda x: x[1].get("total_spend_with_vendor", 0),
+        reverse=True
+    ) 
+    top_50_vendors = sorted_vendors[:50]
+    trimmed_vendors = {}
+    for v_name, v_data in top_50_vendors:
+        items = v_data.get("items_bought", [])
+        latest_items = sorted(items, key=lambda x: x.get("date", ""), reverse=True)[:3]
+        
+        trimmed_vendors[v_name] = {
+            "total_spend_with_vendor": round(v_data.get("total_spend_with_vendor", 0), 2),
+            "items_bought": latest_items
+        }
     return jsonify({
         "entity_name": entity_name,
-        "total_spend": round(entity["total_spend"], 2),
-        "vendors_used": entity["vendors_used"],
+        "total_spend": round(entity.get("total_spend", 0), 2),
+        "vendors_used": trimmed_vendors,
+        "total_vendors_count": len(all_vendors),
         "ai_summary": summary
     })
-
 @info_bp.route("/reload", methods=["POST"])
 def reload_data():
     load_and_index_data()

@@ -1,11 +1,10 @@
-import react from 'react';
+import React from 'react';
 import ContractsPage from '../../components/contracts/ContractPage';
 
-
-export default function contracts(){
+export default function ContractsRoute() {
   return (
     <div>
-      <ContractsPage />
+      <ContractsPage name="Virginia Department of Transportation" />
     </div>
-  )
+  );
 }
