@@ -6,6 +6,7 @@ from .dish_preference_routes import dish_bp
 from .recommendation_routes import recommendations_bp
 from .analytics_routes import analytics_bp
 from .habit_routes import habit
+from .pdf_scan_routes import pdf_bot_bp
 
 
 def register_blueprints(app):
@@ -17,6 +18,7 @@ def register_blueprints(app):
     app.register_blueprint(recipes_bp)    # /recipes
     app.register_blueprint(recipe_chat_bp)  # /recipe_chat
     app.register_blueprint(recommendations_bp)
-    app.register_blueprint(dish_bp) # /dish_preference
+    app.register_blueprint(dish_bp)  # /dish_preference
     app.register_blueprint(analytics_bp)
     app.register_blueprint(habit)
+    app.register_blueprint(pdf_bot_bp)
