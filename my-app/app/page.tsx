@@ -1,6 +1,7 @@
 import ActionCenter from "@/components/dashboards/ActionCenter";
 import StatCard from "@/components/dashboards/StatCard";
-import {motion} from 'framer-motion';
+import UploadPage from "@/components/upload/UploadPage";
+
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
         <StatCard title="Active Contracts" value={124} />
         <StatCard title="Expiring Soon" value={8} />
         <StatCard title="Savings Opportunities" value={124} />
+           <UploadPage />
       </div>
     </div>
   );
