@@ -1,7 +1,128 @@
+// "use client";
+// import { useState, useRef } from "react";
+// import { useRouter } from "next/navigation";
+// import { motion } from "framer-motion";
+// import toast from "react-hot-toast";
+// import { UploadCloud, FileText, X } from "lucide-react";
+
+// export default function UploadCard() {
+//   const [files, setFiles] = useState<File[]>([]);
+//   const [uploading, setUploading] = useState(false);
+//   const fileInputRef = useRef<HTMLInputElement>(null);
+//   const router = useRouter();
+
+//   const handleBrowseClick = () => fileInputRef.current?.click();
+
+//   const handleFiles = (newFiles: FileList | null) => {
+//     if (!newFiles) return;
+//     const pdfs = Array.from(newFiles).filter((f) => f.type === "application/pdf");
+//     setFiles(pdfs);
+//   };
+
+//   const removeFile = (index: number) => setFiles((prev) => prev.filter((_, i) => i !== index));
+
+//   const handleUpload = async () => {
+//     if (files.length === 0) {
+//       toast.error("Please select at least one PDF.");
+//       return;
+//     }
+
+//     setUploading(true);
+//     const formData = new FormData();
+//     files.forEach((f) => formData.append("file", f));
+
+//     try {
+//       const res = await fetch("/pdf_bot/process", {
+//         method: "POST",
+//         body: formData,
+//       });
+
+//       if (!res.ok) throw new Error("Upload failed");
+
+//       const data = await res.json();
+
+//       // Redirect to /upload page with the filename
+//       const filename = encodeURIComponent(data.data.filename);
+//       router.push(`/upload?file=${filename}`);
+//     } catch (err: any) {
+//       console.error(err);
+//       toast.error(err.message || "Something went wrong");
+//     } finally {
+//       setUploading(false);
+//     }
+//   };
+
+//   return (
+//     <motion.div
+//       initial={{ opacity: 0, y: 20 }}
+//       animate={{ opacity: 1, y: 0 }}
+//       className="bg-white rounded-2xl shadow-lg p-6 flex flex-col"
+//     >
+//       <h3 className="text-lg font-semibold mb-2">Upload PDF Contracts</h3>
+//       <p className="text-sm text-neutral-500 mb-4">
+//         Drag & drop or browse PDF files to extract summaries.
+//       </p>
+
+//       <div
+//         onDragOver={(e) => e.preventDefault()}
+//         onDrop={(e) => {
+//           e.preventDefault();
+//           handleFiles(e.dataTransfer.files);
+//         }}
+//         className="flex flex-col items-center justify-center border-2 border-dashed border-neutral-300 rounded-xl p-4 mb-4 cursor-pointer hover:border-green-400 transition"
+//       >
+//         <UploadCloud className="w-12 h-12 text-green-500 mb-2 animate-bounce" />
+//         <p className="text-sm text-neutral-500">Drag & drop PDFs here or click browse</p>
+//         <button
+//           type="button"
+//           onClick={handleBrowseClick}
+//           className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition"
+//         >
+//           Browse Files
+//         </button>
+//         <input
+//           type="file"
+//           multiple
+//           accept="application/pdf"
+//           ref={fileInputRef}
+//           className="hidden"
+//           onChange={(e) => handleFiles(e.target.files)}
+//         />
+//       </div>
+
+//       {files.length > 0 && (
+//         <div className="mb-4">
+//           {files.map((file, idx) => (
+//             <div
+//               key={idx}
+//               className="flex justify-between items-center bg-neutral-100 rounded-md p-2 mb-2"
+//             >
+//               <FileText className="w-5 h-5 text-green-500" />
+//               <span className="text-sm font-medium">{file.name}</span>
+//               <button onClick={() => removeFile(idx)}>
+//                 <X className="w-4 h-4 text-red-500" />
+//               </button>
+//             </div>
+//           ))}
+//         </div>
+//       )}
+
+//       <button
+//         onClick={handleUpload}
+//         disabled={uploading}
+//         className="mt-auto px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50"
+//       >
+//         {uploading ? "Uploading & Processing..." : "Upload & Process"}
+//       </button>
+//     </motion.div>
+//   );
+// }
+
 "use client";
+
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import axios from "axios";
 import toast from "react-hot-toast";
 import { UploadCloud, FileText, X } from "lucide-react";
 
@@ -9,44 +130,47 @@ export default function UploadCard() {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
 
   const handleBrowseClick = () => fileInputRef.current?.click();
 
   const handleFiles = (newFiles: FileList | null) => {
     if (!newFiles) return;
-    const pdfs = Array.from(newFiles).filter((f) => f.type === "application/pdf");
+    const pdfs = Array.from(newFiles).filter(
+      (f) => f.type === "application/pdf"
+    );
     setFiles(pdfs);
   };
 
-  const removeFile = (index: number) => setFiles((prev) => prev.filter((_, i) => i !== index));
+  const removeFile = (index: number) =>
+    setFiles((prev) => prev.filter((_, i) => i !== index));
 
   const handleUpload = async () => {
-    if (files.length === 0) {
-      toast.error("Please select at least one PDF.");
-      return;
-    }
-
     setUploading(true);
-    const formData = new FormData();
-    files.forEach((f) => formData.append("file", f));
+
+    // Specific JSON payload as requested
+    const payload = {
+      file_path:
+        "C:\\Users\\taksh\\OneDrive\\Desktop\\Hackathon\\open-city-webapp\\Backend_Folder\\app\\routes\\3643773.pdf",
+    };
 
     try {
-      const res = await fetch("/pdf_bot/process", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/pdf_bot/process-local",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (!res.ok) throw new Error("Upload failed");
-
-      const data = await res.json();
-
-      // Redirect to /upload page with the filename
-      const filename = encodeURIComponent(data.data.filename);
-      router.push(`/upload?file=${filename}`);
+      sessionStorage.setItem("summary", JSON.stringify(response.data));
+      toast.success("Processing complete!");      
     } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Something went wrong");
+      console.error("Upload Error:", err);
+      const errorMessage =
+        err.response?.data?.error || "Something went wrong during processing.";
+      toast.error(errorMessage);
     } finally {
       setUploading(false);
     }
@@ -58,11 +182,11 @@ export default function UploadCard() {
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-2xl shadow-lg p-6 flex flex-col"
     >
-      <h3 className="text-lg font-semibold mb-2">Upload PDF Contracts</h3>
+      <h3 className="text-lg font-semibold mb-2">Process Local PDF</h3>
       <p className="text-sm text-neutral-500 mb-4">
-        Drag & drop or browse PDF files to extract summaries.
+        Click the button below to process the local contract file and generate
+        an AI summary.
       </p>
-
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
@@ -71,8 +195,11 @@ export default function UploadCard() {
         }}
         className="flex flex-col items-center justify-center border-2 border-dashed border-neutral-300 rounded-xl p-4 mb-4 cursor-pointer hover:border-green-400 transition"
       >
-        <UploadCloud className="w-12 h-12 text-green-500 mb-2 animate-bounce" />
-        <p className="text-sm text-neutral-500">Drag & drop PDFs here or click browse</p>
+        <UploadCloud className="w-12 h-12 text-green-500 mb-2" />
+        <p className="text-sm text-neutral-500 text-center">
+          UI File selection is optional. <br /> The backend will process the
+          pre-configured local path.
+        </p>
         <button
           type="button"
           onClick={handleBrowseClick}
@@ -97,8 +224,10 @@ export default function UploadCard() {
               key={idx}
               className="flex justify-between items-center bg-neutral-100 rounded-md p-2 mb-2"
             >
-              <FileText className="w-5 h-5 text-green-500" />
-              <span className="text-sm font-medium">{file.name}</span>
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-green-500" />
+                <span className="text-sm font-medium">{file.name}</span>
+              </div>
               <button onClick={() => removeFile(idx)}>
                 <X className="w-4 h-4 text-red-500" />
               </button>
@@ -110,9 +239,10 @@ export default function UploadCard() {
       <button
         onClick={handleUpload}
         disabled={uploading}
-        className="mt-auto px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50"
+        className="mt-auto px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
       >
-        {uploading ? "Uploading & Processing..." : "Upload & Process"}
+        {uploading && <span className="animate-spin text-lg">⏳</span>}
+        {uploading ? "Processing Local Path..." : "Process Local Contract"}
       </button>
     </motion.div>
   );
