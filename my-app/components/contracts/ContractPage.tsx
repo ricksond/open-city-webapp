@@ -60,12 +60,14 @@ export default function ContractsPage({ name }: ContractsPageProps) {
   const vendorNames = Object.keys(vendorsUsed);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-10">
+    <motion.div initial={{ opacity: 0 ,y:20}} animate={{ opacity: 1, y: 0 }} transition={{duration:0.8}} 
+    className="min-h-screen bg-gray-50 p-6 space-y-10 bg-gradient-to-r from-indigo-200 to-emerald-100">
       <div className="flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white shadow-xl rounded-2xl p-6 w-full max-w-2xl space-y-6"
+          transition={{duration:0.8}}
+          className="bg-white shadow-xl rounded-2xl p-6 w-full max-w-2xl space-y-6 bg-linear-r from-indigo-100 to-emerald-100"
         >
           <div className="flex items-center gap-3">
             {type === "vendor" ? <Building className="text-indigo-600 w-8 h-8" /> : <Building className="text-emerald-600 w-8 h-8" />}
@@ -209,6 +211,6 @@ export default function ContractsPage({ name }: ContractsPageProps) {
           )
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

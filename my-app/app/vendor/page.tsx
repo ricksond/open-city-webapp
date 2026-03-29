@@ -60,17 +60,18 @@ export default function ProcurementPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen w-full bg-gradient-to-br from-slate-50 to-slate-200 p-6"
+      initial={{ opacity: 0, y:20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{duration:0.8}}
+      className="min-h-screen w-full bg-linear-to-r from-indigo-200 to-pink-100 p-6"
     >
       <header className="mb-8 max-w-4xl">
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+        <h1 className="text-4xl font-extrabold text-slate-900 tracking-widest flex items-center gap-3">
           <Search className="w-8 h-8 text-indigo-600" />
-          Procurement Intelligence
+          Vendor and Entity Procurement 
         </h1>
-        <p className="text-slate-600 mt-2">
-          Searching for: <span className="font-semibold text-slate-800">{targetSearchName}</span>
+        <p className="text-slate-600 mt-2 tracking-widest">
+          Searching for: <span className="font-semibold text-slate-800 tracking-widest">{targetSearchName}</span>
         </p>
       </header>
 
